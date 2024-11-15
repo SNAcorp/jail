@@ -3,8 +3,6 @@ services:
     build: .
     expose:
       - "80"
-    environment:
-      - SECRET_KEY=cokbmdfpkb
     volumes:
       - ./app:/app
     labels:
