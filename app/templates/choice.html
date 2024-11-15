@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Сделайте выбор</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="text-center mb-4">Дилемма заключённого</h1>
+        <p class="text-center mb-4">Ваш оппонент: {{ opponent }}</p>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Правила:</h5>
+                        <ul>
+                            <li>Если оба молчат: каждый получает по 1 году</li>
+                            <li>Если один предаёт, а другой молчит: предатель выходит на свободу, молчащий получает 3 года</li>
+                            <li>Если оба предают: каждый получает по 2 года</li>
+                        </ul>
+                    </div>
+                </div>
+                <form method="post" action="/make_choice">
+                    <div class="d-grid gap-3">
+                        <button type="submit" name="choice" value="betray" class="btn btn-danger btn-lg">Предать</button>
+                        <button type="submit" name="choice" value="cooperate" class="btn btn-success btn-lg">Молчать</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

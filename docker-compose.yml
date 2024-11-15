@@ -1,0 +1,21 @@
+services:
+  jail-web:
+    build: .
+    expose:
+      - "80"
+    environment:
+      - SECRET_KEY=cokbmdfpkb
+    volumes:
+      - ./app:/app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jail.rule=Host(`jail.sna.lol`)"
+      - "traefik.http.routers.jail.entrypoints=websecure"
+      - "traefik.http.routers.jail.tls.certresolver=myresolver"
+      - "traefik.http.routers.jail.priority=10"
+    networks:
+      - traefik_network
+
+networks:
+  traefik_network:
+    external: true

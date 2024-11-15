@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Админ панель</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="text-center mb-4">Статистика игр</h1>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Оба предали</h5>
+                        <p class="card-text display-4">{{ stats.both_betrayed }}</p>
+                        <p class="text-muted">{{ "%.1f"|format(stats.both_betrayed_percent) }}%</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Оба молчали</h5>
+                        <p class="card-text display-4">{{ stats.both_cooperated }}</p>
+                        <p class="text-muted">{{ "%.1f"|format(stats.both_cooperated_percent) }}%</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Один предал</h5>
+                        <p class="card-text display-4">{{ stats.one_betrayed }}</p>
+                        <!-- admin.html продолжение -->
+                        <p class="text-muted">{{ "%.1f"|format(stats.one_betrayed_percent) }}%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Общая статистика</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Всего игр:</strong> {{ stats.total_games }}</p>
+                        <p><strong>Средний срок заключения:</strong>
+                            {{ "%.1f"|format(
+                                (stats.both_betrayed * 4 + stats.both_cooperated * 2 + stats.one_betrayed * 3) /
+                                (stats.total_games if stats.total_games > 0 else 1)
+                            ) }} лет
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Коэффициент предательства:</strong>
+                            {{ "%.2f"|format(
+                                (stats.both_betrayed * 2 + stats.one_betrayed) /
+                                (stats.total_games * 2 if stats.total_games > 0 else 1)
+                            ) }}
+                        </p>
+                        <p><strong>Коэффициент кооперации:</strong>
+                            {{ "%.2f"|format(
+                                (stats.both_cooperated * 2 + stats.one_betrayed) /
+                                (stats.total_games * 2 if stats.total_games > 0 else 1)
+                            ) }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">История игр</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Дата и время</th>
+                                <th>Игрок 1</th>
+                                <th>Выбор</th>
+                                <th>Срок</th>
+                                <th>Игрок 2</th>
+                                <th>Выбор</th>
+                                <th>Срок</th>
+                                <th>Результат</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for game in stats.games %}
+                            <tr>
+                                <td>{{ game.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ game.player1 }}</td>
+                                <td>
+                                    {% if game.player1_choice == 'betray' %}
+                                    <span class="badge bg-danger">Предал</span>
+                                    {% else %}
+                                    <span class="badge bg-success">Молчал</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ game.player1_sentence }} лет</td>
+                                <td>{{ game.player2 }}</td>
+                                <td>
+                                    {% if game.player2_choice == 'betray' %}
+                                    <span class="badge bg-danger">Предал</span>
+                                    {% else %}
+                                    <span class="badge bg-success">Молчал</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ game.player2_sentence }} лет</td>
+                                <td>
+                                    {% if game.player1_choice == 'betray' and game.player2_choice == 'betray' %}
+                                    <span class="badge bg-danger">Оба предали</span>
+                                    {% elif game.player1_choice == 'cooperate' and game.player2_choice == 'cooperate' %}
+                                    <span class="badge bg-success">Оба молчали</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark">Один предал</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Графики статистики -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Распределение результатов</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="resultsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Динамика выборов</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Круговая диаграмма результатов
+        const resultsCtx = document.getElementById('resultsChart').getContext('2d');
+        new Chart(resultsCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Оба предали', 'Оба молчали', 'Один предал'],
+                datasets: [{
+                    data: [
+                        {{ stats.both_betrayed }},
+                        {{ stats.both_cooperated }},
+                        {{ stats.one_betrayed }}
+                    ],
+                    backgroundColor: [
+                        '#dc3545',
+                        '#198754',
+                        '#ffc107'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // График динамики выборов во времени
+        const timelineData = {
+            labels: [{% for game in stats.games %}'{{ game.timestamp.strftime("%H:%M") }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Предательства',
+                data: [{% for game in stats.games %}{{ (1 if game.player1_choice == 'betray' else 0) + (1 if game.player2_choice == 'betray' else 0) }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                borderColor: '#dc3545',
+                fill: false
+            }]
+        };
+
+        const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+        new Chart(timelineCtx, {
+            type: 'line',
+            data: timelineData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 2
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
