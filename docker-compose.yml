@@ -1,5 +1,5 @@
 services:
-  jail-web:
+  jail-web-2:
     build: .
     expose:
       - "80"
